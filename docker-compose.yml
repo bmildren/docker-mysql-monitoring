@@ -1,0 +1,123 @@
+version: '2'
+
+services:
+  prometheus_data:
+    image: prom/prometheus
+    container_name: prometheus_data
+    entrypoint: /bin/true
+
+  grafana_data:
+    image: grafana/grafana
+    container_name: grafana_data
+    volumes: 
+      - /usr/share/grafana
+    entrypoint: /bin/true
+
+  influx_data:
+    image: tutum/influxdb
+    container_name: influx_data
+    command: /bin/true
+
+  influxdb:
+    image: tutum/influxdb
+    container_name: influx
+    volumes_from: 
+      - influx_data
+    environment:
+      - PRE_CREATE_DB=prometheus
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+    networks:
+      - monitor
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prom
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+    volumes_from:
+      - prometheus_data
+    ports:
+      - "9090:9090"
+    networks:
+      - monitor
+    command: [ "-config.file=/etc/prometheus/prometheus.yml", 
+               "-storage.local.path=/prometheus", 
+               "-storage.local.retention=168h", 
+               "-storage.local.memory-chunks=524288", 
+               "-storage.remote.influxdb-url=http://localhost:8086", 
+               "-web.console.libraries=/etc/prometheus/console_libraries", 
+               "-web.console.templates=/etc/prometheus/consoles" ]
+    depends_on:
+      - influxdb
+
+  grafana_pre:
+    build:
+      context: ./grafana/scripts
+    container_name: grafana_pre
+    volumes:
+      - ./grafana/scripts/pre-scripts:/scripts
+    volumes_from:
+      - grafana_data
+    network_mode: host
+    command: /scripts/run.sh
+
+  grafana:
+    image: grafana/grafana
+    container_name: graf
+    volumes: 
+      - ./grafana/config:/etc/grafana
+    volumes_from:
+      - grafana_data
+    environment:
+      - GF_SERVER_ROOT_URL=http://grafana.percona.demo
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    networks:
+      - monitor
+    depends_on:
+      - prometheus
+      - influxdb
+      - grafana_pre
+
+  grafana_post:
+    build:
+      context: ./grafana/scripts
+    container_name: grafana_post
+    volumes:
+      - ./grafana/scripts/post-scripts:/scripts
+    volumes_from: 
+      - grafana_data
+    networks:
+      - monitor
+    command: /scripts/run.sh
+    depends_on:
+      - grafana
+
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    network_mode: host
+    command: -collectors.enabled=diskstats,filesystem,loadavg,meminfo,netdev,stat,time,uname
+    depends_on:
+      - prometheus
+
+  mysqld_exporter:
+    image: prom/mysqld-exporter
+    container_name: mysqld_exporter
+    environment:
+      - DATA_SOURCE_NAME="prom:abc123@(localhost:3306)/"
+    ports:
+      - "9104:9104"
+    network_mode: host
+    command: -collect.info_schema.processlist=true
+    depends_on:
+      - prometheus
+
+networks:
+  monitor:
+    driver: bridge
