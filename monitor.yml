@@ -42,6 +42,7 @@ services:
       - "9090:9090"
     networks:
       - monitor
+      - dbnode
     command: [ "-config.file=/etc/prometheus/prometheus.yml", 
                "-storage.local.path=/prometheus", 
                "-storage.local.retention=168h", 
@@ -60,23 +61,23 @@ services:
       - ./grafana/scripts/pre-scripts:/scripts
     volumes_from:
       - grafana_data
-    network_mode: host
+    networks:
+      - monitor
     command: /scripts/run.sh
 
   grafana:
     image: grafana/grafana
     container_name: graf
     volumes: 
+      - ./grafana/scripts/run/scripts:/scripts
       - ./grafana/config:/etc/grafana
     volumes_from:
       - grafana_data
-    environment:
-      - GF_SERVER_ROOT_URL=http://grafana.percona.demo
-      - GF_SECURITY_ADMIN_PASSWORD=admin
     ports:
       - "3000:3000"
     networks:
       - monitor
+    entrypoint: /scripts/run.sh
     depends_on:
       - prometheus
       - influxdb
@@ -90,34 +91,16 @@ services:
       - ./grafana/scripts/post-scripts:/scripts
     volumes_from: 
       - grafana_data
+    environment:
+      - GRAFANA_HOST=graf
     networks:
       - monitor
     command: /scripts/run.sh
     depends_on:
       - grafana
 
-  node_exporter:
-    image: prom/node-exporter
-    container_name: node_exporter
-    ports:
-      - "9100:9100"
-    network_mode: host
-    command: -collectors.enabled=diskstats,filesystem,loadavg,meminfo,netdev,stat,time,uname
-    depends_on:
-      - prometheus
-
-  mysqld_exporter:
-    image: prom/mysqld-exporter
-    container_name: mysqld_exporter
-    environment:
-      - DATA_SOURCE_NAME="prom:abc123@(localhost:3306)/"
-    ports:
-      - "9104:9104"
-    network_mode: host
-    command: -collect.info_schema.processlist=true
-    depends_on:
-      - prometheus
-
 networks:
   monitor:
+    driver: bridge
+  dbnode:
     driver: bridge

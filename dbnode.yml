@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+  mysqld_data:
+    image: percona
+    container_name: mysqld_data
+    entrypoint: /bin/true
+
+  mysqld:
+    image: percona
+    container_name: db1
+    volumes:
+      - ./mysql/scripts:/docker-entrypoint-initdb.d/
+    volumes_from:
+      - mysqld_data
+    environment:
+      - MYSQL_ROOT_PASSWORD=abc123
+    ports:
+      - "3600:3600"
+    networks:
+      - dbnode
+
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter_1
+    ports:
+      - "9100:9100"
+    networks:
+      - dbnode
+    command: -collectors.enabled=diskstats,filesystem,loadavg,meminfo,netdev,stat,time,uname
+
+  mysqld_exporter:
+    image: prom/mysqld-exporter
+    container_name: mysqld_exporter_1
+    environment:
+      - DATA_SOURCE_NAME=prom:abc123@(db1:3306)/
+    ports:
+      - "9104:9104"
+    networks:
+      - dbnode
+    command: -collect.info_schema.processlist=true
+      - mysqld
+
+networks:
+  dbnode:
+    driver: bridge
