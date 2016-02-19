@@ -20,7 +20,7 @@ services:
 
   influxdb:
     image: tutum/influxdb
-    container_name: influx
+    container_name: percona_influxdb
     volumes_from: 
       - influx_data
     environment:
@@ -29,11 +29,11 @@ services:
       - "8083:8083"
       - "8086:8086"
     networks:
-      - monitor
+      - percona_monitor
 
   prometheus:
     image: prom/prometheus
-    container_name: prom
+    container_name: percona_prometheus
     volumes:
       - ./prometheus/config:/etc/prometheus
     volumes_from:
@@ -41,13 +41,13 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - monitor
-      - dbnode
+      - percona_monitor
+      - example_dbnode
     command: [ "-config.file=/etc/prometheus/prometheus.yml", 
                "-storage.local.path=/prometheus", 
                "-storage.local.retention=168h", 
                "-storage.local.memory-chunks=524288", 
-               "-storage.remote.influxdb-url=http://localhost:8086", 
+               "-storage.remote.influxdb-url=http://percona_influxdb:8086", 
                "-web.console.libraries=/etc/prometheus/console_libraries", 
                "-web.console.templates=/etc/prometheus/consoles" ]
     depends_on:
@@ -56,18 +56,18 @@ services:
   grafana_pre:
     build:
       context: ./grafana/scripts
-    container_name: grafana_pre
+    container_name: percona_grafana_pre
     volumes:
       - ./grafana/scripts/pre-scripts:/scripts
     volumes_from:
       - grafana_data
     networks:
-      - monitor
+      - percona_monitor
     command: /scripts/run.sh
 
   grafana:
     image: grafana/grafana
-    container_name: graf
+    container_name: percona_grafana
     volumes: 
       - ./grafana/scripts/run/scripts:/scripts
       - ./grafana/config:/etc/grafana
@@ -76,7 +76,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - monitor
+      - percona_monitor
     entrypoint: /scripts/run.sh
     depends_on:
       - prometheus
@@ -86,21 +86,35 @@ services:
   grafana_post:
     build:
       context: ./grafana/scripts
-    container_name: grafana_post
+    container_name: percona_grafana_post
     volumes:
       - ./grafana/scripts/post-scripts:/scripts
     volumes_from: 
       - grafana_data
     environment:
-      - GRAFANA_HOST=graf
+      - GRAFANA_HOST=percona_grafana
     networks:
-      - monitor
+      - percona_monitor
     command: /scripts/run.sh
     depends_on:
       - grafana
 
+  influxdb_post:
+    build:
+      context: ./influxdb/scripts
+    container_name: percona_influxdb_post
+    volumes:
+      - ./influxdb/scripts/post-scripts:/scripts
+    environment:
+      - INFLUXDB_HOST=percona_influxdb
+    networks:
+      - percona_monitor
+    command: /scripts/run.sh
+    depends_on:
+      - influxdb
+
 networks:
-  monitor:
+  percona_monitor:
     driver: bridge
-  dbnode:
+  example_dbnode:
     driver: bridge
