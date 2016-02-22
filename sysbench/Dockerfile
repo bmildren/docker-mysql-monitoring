@@ -4,7 +4,7 @@ MAINTAINER Ben Mildren
 RUN yum install -y http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm && \
     yum update && \
     sed -i 's/tsflags=nodocs//g' /etc/yum.conf && \
-    yum install -y Percona-Server-client-56 sysbench && \
+    yum install -y sysbench nmap && \
     yum clean all && \
     rm -rf /var/cache/yum
 

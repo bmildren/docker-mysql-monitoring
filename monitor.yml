@@ -5,6 +5,8 @@ services:
     image: prom/prometheus
     container_name: prometheus_data
     entrypoint: /bin/true
+    labels:
+      - "mon.percona.container_type=data_container"
 
   grafana_data:
     image: grafana/grafana
@@ -12,11 +14,15 @@ services:
     volumes: 
       - /usr/share/grafana
     entrypoint: /bin/true
+    labels:
+      - "mon.percona.container_type=data_container"
 
   influx_data:
     image: tutum/influxdb
     container_name: influx_data
     command: /bin/true
+    labels:
+      - "mon.percona.container_type=data_container"
 
   influxdb:
     image: tutum/influxdb
@@ -30,6 +36,8 @@ services:
       - "8086:8086"
     networks:
       - percona_monitor
+    labels:
+      - "mon.percona.container_type=monitoring"
 
   prometheus:
     image: prom/prometheus
@@ -42,7 +50,7 @@ services:
       - "9090:9090"
     networks:
       - percona_monitor
-      - example_dbnode
+      - dbnode
     command: [ "-config.file=/etc/prometheus/prometheus.yml", 
                "-storage.local.path=/prometheus", 
                "-storage.local.retention=168h", 
@@ -50,6 +58,8 @@ services:
                "-storage.remote.influxdb-url=http://percona_influxdb:8086", 
                "-web.console.libraries=/etc/prometheus/console_libraries", 
                "-web.console.templates=/etc/prometheus/consoles" ]
+    labels:
+      - "mon.percona.container_type=monitoring"
     depends_on:
       - influxdb
 
@@ -64,6 +74,8 @@ services:
     networks:
       - percona_monitor
     command: /scripts/run.sh
+    labels:
+      - "mon.percona.container_type=scripts"
 
   grafana:
     image: grafana/grafana
@@ -78,6 +90,8 @@ services:
     networks:
       - percona_monitor
     entrypoint: /scripts/run.sh
+    labels:
+      - "mon.percona.container_type=monitoring"
     depends_on:
       - prometheus
       - influxdb
@@ -96,6 +110,8 @@ services:
     networks:
       - percona_monitor
     command: /scripts/run.sh
+    labels:
+      - "mon.percona.container_type=scripts"
     depends_on:
       - grafana
 
@@ -110,11 +126,13 @@ services:
     networks:
       - percona_monitor
     command: /scripts/run.sh
+    labels:
+      - "mon.percona.container_type=scripts"
     depends_on:
       - influxdb
 
 networks:
   percona_monitor:
     driver: bridge
-  example_dbnode:
+  dbnode:
     driver: bridge

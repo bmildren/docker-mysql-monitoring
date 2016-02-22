@@ -2,12 +2,14 @@ version: '2'
 
 services:
   mysqld_data:
-    image: percona
+    image: percona:latest
     container_name: mysqld_data
     entrypoint: /bin/true
+    labels:
+      - "mon.percona.container_type=data_container"
 
   mysqld:
-    image: percona
+    image: percona:latest
     container_name: db1_mysql
     volumes:
       - ./mysql/scripts:/docker-entrypoint-initdb.d/
@@ -18,27 +20,48 @@ services:
     ports:
       - "3600:3600"
     networks:
-      - example_dbnode
+      - dbnode
+    labels:
+      - "mon.percona.container_type=mysql"
+
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: db1_cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "9101:9101"
+    networks:
+      - dbnode
+    labels:
+      - "mon.percona.container_type=collector"
 
   node_exporter:
-    image: prom/node-exporter
+    image: prom/node-exporter:latest
     container_name: db1_node_exporter
     ports:
       - "9100:9100"
     networks:
-      - example_dbnode
+      - dbnode
     command: -collectors.enabled=diskstats,filesystem,loadavg,meminfo,netdev,stat,time,uname
+    labels:
+      - "mon.percona.container_type=collector"
 
   mysqld_exporter:
-    image: prom/mysqld-exporter
+    image: prom/mysqld-exporter:latest
     container_name: db1_mysqld_exporter
     environment:
       - DATA_SOURCE_NAME=prometheus:prometheus@(db1_mysql:3306)/
     ports:
       - "9104:9104"
     networks:
-      - example_dbnode
+      - dbnode
     command: -collect.info_schema.processlist=true
+    labels:
+      - "mon.percona.container_type=collector"
     depends_on:
       - mysqld
 
@@ -49,10 +72,12 @@ services:
     volumes:
       - ./sysbench/scripts/run:/scripts
     networks:
-      - example_dbnode 
+      - dbnode 
+    labels:
+      - "mon.percona.container_type=load_test"
     depends_on:
       - mysqld
 
 networks:
-  example_dbnode:
+  dbnode:
     driver: bridge

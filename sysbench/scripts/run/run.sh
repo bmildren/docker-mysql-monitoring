@@ -1,7 +1,7 @@
 #!/bin/bash
 
 for i in {60..0}; do
-  if echo 'SELECT 1' | mysql -h${MYSQL_HOST} -u${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DB} &> /dev/null; then
+  if nmap -Pn -p3306 db1_mysql | grep open > /dev/null; then
     break
   fi
     echo 'MySQL init process in progress...'
@@ -9,7 +9,7 @@ for i in {60..0}; do
 done
 
 if [ $i -eq 0 ] ; then
-  echo "Grafana failed to startup" >&2
+  echo "MySQL failed to startup" >&2
   exit 1
 fi
 

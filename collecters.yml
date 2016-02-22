@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: db1_cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "9101:9101"
+    networks:
+      - dbnode
+    labels:
+      - "mon.percona.container_type=collector"
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: db1_node_exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - dbnode
+    command: -collectors.enabled=diskstats,filesystem,loadavg,meminfo,netdev,stat,time,uname
+    labels:
+      - "mon.percona.container_type=collector"
+
+  mysqld_exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: db1_mysqld_exporter
+    environment:
+      - DATA_SOURCE_NAME=prometheus:prometheus@(db1_mysql:3306)/
+    ports:
+      - "9104:9104"
+    networks:
+      - dbnode
+    command: -collect.info_schema.processlist=true
+    labels:
+      - "mon.percona.container_type=collector"
+
+networks:
+  dbnode:
+    driver: bridge

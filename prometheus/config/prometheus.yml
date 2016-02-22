@@ -5,6 +5,6 @@ global:
 scrape_configs:
   - job_name: monitor
     target_groups:
-      - targets: ['db1_node_exporter:9100', 'db1_mysqld_exporter:9104']
+      - targets: ['db1_node_exporter:9100', 'db1_mysqld_exporter:9104', 'db1_cadvisor:8080']
         labels:
           alias: db1

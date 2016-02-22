@@ -1,6 +1,5 @@
 FROM alpine:latest
 MAINTAINER Ben Mildren
 
-RUN apk add --update bash curl sed && rm -rf /var/cache/apk/*
-RUN apk add --update git netcat-openbsd && rm -rf /var/cache/apk/*
+RUN apk add --update bash curl sed git && rm -rf /var/cache/apk/*
 CMD ["/bin/true"]

@@ -4,6 +4,8 @@ MySQL monitoring example using docker-compose to orchestrate a monitoring soluti
 
 The example will work with docker-machine however you will have to forward the grafana port (3000) to your localhost e.g. `ssh -L 3000:localhost:3000 docker@$(docker-machine ip)` (_default boot2docker password == tcuser_).
 
+cadvisor needs to mount filesystems from the host running the docker containers, the combination of docker-compose and docker-machine won't allow this, however a simple bash script is supplied `cadvisor_docker_machine.sh` which will stop the cadvisor container created by docker-compose and run one manually on the supplied docker-machine.
+
 ### Example usage
 
 Bring up monitor containers
