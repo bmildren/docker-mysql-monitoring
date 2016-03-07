@@ -17,6 +17,15 @@ cadvisor needs to mount filesystems from the host running the docker containers,
 
 If you want to monitor other hosts edit the prometheus config file `./prometheus/config/prometheus.yml` add additional targets or your service discovery of choice, and restart prometheus `docker-compose -f monitor.yml restart prometheus`
 
+### Default ports
+* Grafana: 3000
+* Prometheus: 9090
+* InfluxDB: 8083 8086
+* MySQL: 3306
+* Prometheus Node Exporter: 9100
+* Prometheus MySQL Exporter: 9104
+* cAdvisor: 8080
+
 ### Example usage
 
 Bring up monitor containers

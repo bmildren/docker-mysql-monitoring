@@ -18,7 +18,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
     ports:
-      - "3600:3600"
+      - "3306:3306"
     networks:
       - dbnode
     labels:
@@ -33,7 +33,7 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     ports:
-      - "9101:9101"
+      - "8080:8080"
     networks:
       - dbnode
     labels:
