@@ -80,4 +80,5 @@ services:
 
 networks:
   dbnode:
-    driver: bridge
+    external: 
+      name: monitor_dbnode
