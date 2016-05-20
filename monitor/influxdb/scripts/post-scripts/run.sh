@@ -24,7 +24,7 @@ if [ $i -eq 0 ] ; then
   exit 1
 fi
 
-curl -o /tmp/influxdb_cq.py https://raw.githubusercontent.com/percona/grafana-dashboards/master/influxdb_cq.py > /dev/null
+curl -o /tmp/influxdb_cq.py https://raw.githubusercontent.com/percona/grafana-dashboards/master/misc/influxdb_cq.py > /dev/null
 
 if [ $? -eq 0 ]
 then
@@ -34,7 +34,7 @@ else
   exit 1
 fi
 
-sed -i "s/localhost/${INFLUXDB_HOST}/" /tmp/influxdb_cq.py
+sed -i "s/localhost/influxdb/" /tmp/influxdb_cq.py
 
 if [ $? -eq 0 ]
 then
