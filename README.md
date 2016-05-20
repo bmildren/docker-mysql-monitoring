@@ -23,7 +23,9 @@ If you want to monitor other hosts edit the prometheus config file `./prometheus
 * InfluxDB: 8083 8086
 * MySQL: 3306
 * Prometheus Node Exporter: 9100
-* Prometheus MySQL Exporter: 9104
+* Prometheus MySQL Exporter (High Res): 9104
+* Prometheus MySQL Exporter (Med Res): 9105
+* Prometheus MySQL Exporter (Low Res): 9106
 * cAdvisor: 8080
 
 ### Example usage
