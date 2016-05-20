@@ -50,16 +50,46 @@ services:
     labels:
       - "mon.percona.container_type=collector"
 
-  mysqld_exporter:
+  mysqld_exporter_high_res:
     image: prom/mysqld-exporter:latest
-    container_name: db1_mysqld_exporter
+    container_name: db1_mysqld_exporter_hres
     environment:
       - DATA_SOURCE_NAME=prometheus:prometheus@(db1_mysql:3306)/
     ports:
       - "9104:9104"
     networks:
       - dbnode
-    command: -collect.info_schema.processlist=true
+    command: ["-web.listen-address=:9104", "-collect.global_status=true", "-collect.global_variables=false", "-collect.slave_status=false", "-collect.info_schema.tables=false", "-collect.binlog_size=false", "-collect.info_schema.processlist=false", "-collect.info_schema.userstats=false", "-collect.info_schema.tables=false", "-collect.auto_increment.columns=false", "-collect.info_schema.tablestats=false", "-collect.perf_schema.file_events=false", "-collect.perf_schema.eventsstatements=false", "-collect.perf_schema.indexiowaits=false", "-collect.perf_schema.tableiowaits=false", "-collect.perf_schema.tablelocks=false", "-collect.perf_schema.eventswaits=false"]
+    labels:
+      - "mon.percona.container_type=collector"
+    depends_on:
+      - mysqld
+
+  mysqld_exporter_med_res:
+    image: prom/mysqld-exporter:latest
+    container_name: db1_mysqld_exporter_mres
+    environment:
+      - DATA_SOURCE_NAME=prometheus:prometheus@(db1_mysql:3306)/
+    ports:
+      - "9105:9105"
+    networks:
+      - dbnode
+    command: ["-web.listen-address=:9105", "-collect.global_status=false", "-collect.global_variables=false", "-collect.slave_status=true", "-collect.info_schema.tables=false", "-collect.binlog_size=false", "-collect.info_schema.processlist=true", "-collect.info_schema.userstats=false", "-collect.info_schema.tables=false", "-collect.auto_increment.columns=false", "-collect.info_schema.tablestats=false", "-collect.perf_schema.file_events=true", "-collect.perf_schema.eventsstatements=false", "-collect.perf_schema.indexiowaits=false", "-collect.perf_schema.tableiowaits=false", "-collect.perf_schema.tablelocks=false", "-collect.perf_schema.eventswaits=true"]
+    labels:
+      - "mon.percona.container_type=collector"
+    depends_on:
+      - mysqld
+
+  mysqld_exporter_low_res:
+    image: prom/mysqld-exporter:latest
+    container_name: db1_mysqld_exporter_lres
+    environment:
+      - DATA_SOURCE_NAME=prometheus:prometheus@(db1_mysql:3306)/
+    ports:
+      - "9106:9106"
+    networks:
+      - dbnode
+    command: ["-web.listen-address=:9106", "-collect.global_status=false", "-collect.global_variables=true", "-collect.slave_status=false", "-collect.info_schema.tables=true", "-collect.binlog_size=false", "-collect.info_schema.processlist=false", "-collect.info_schema.userstats=true", "-collect.info_schema.tables=true", "-collect.auto_increment.columns=true", "-collect.info_schema.tablestats=true", "-collect.perf_schema.file_events=false", "-collect.perf_schema.eventsstatements=true", "-collect.perf_schema.indexiowaits=true", "-collect.perf_schema.tableiowaits=true", "-collect.perf_schema.tablelocks=false", "-collect.perf_schema.eventswaits=false"]
     labels:
       - "mon.percona.container_type=collector"
     depends_on:

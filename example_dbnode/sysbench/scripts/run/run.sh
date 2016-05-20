@@ -14,4 +14,4 @@ if [ $i -eq 0 ] ; then
 fi
 
 sysbench --test=/usr/share/doc/sysbench/tests/db/oltp.lua --oltp-table-size=100000 --mysql-host="${MYSQL_HOST}" --mysql-user="${MYSQL_USER}" --mysql-password="${MYSQL_PASSWORD}" --mysql-db="${MYSQL_DB}" prepare
-sysbench --num-threads=16 --test=/usr/share/doc/sysbench/tests/db/oltp.lua --oltp-table-size=100000 --mysql-host="${MYSQL_HOST}" --mysql-user="${MYSQL_USER}" --mysql-password="${MYSQL_PASSWORD}" --mysql-db="${MYSQL_DB}" run
+sysbench --num-threads=16 --test=/usr/share/doc/sysbench/tests/db/oltp.lua --oltp-table-size=100000 --max-requests=0 --max-time=600 --mysql-host="${MYSQL_HOST}" --mysql-user="${MYSQL_USER}" --mysql-password="${MYSQL_PASSWORD}" --mysql-db="${MYSQL_DB}" run
