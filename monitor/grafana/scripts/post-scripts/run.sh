@@ -23,7 +23,7 @@ curl http://admin:admin@grafana:3000/api/datasources -X POST -H 'Content-Type: a
 curl http://admin:admin@grafana:3000/api/datasources -X POST -H 'Content-Type: application/json' \
   --data-binary '{"name":"InfluxDB (trending)","type":"influxdb","url":"http://influxdb:8086","access":"proxy","database":"trending","user":"root","password":"root","isDefault":false}'
 
-sed -i 's/h=b.interval/h=i.replace(b.interval, a.scopedVars)/' /usr/share/grafana/public/app/plugins/datasource/prometheus/datasource.js
+sed -i 's/expr=\(.\)\.replace(\(.\)\.expr,\(.\)\.scopedVars\(.*\)var \(.\)=\(.\)\.interval/expr=\1.replace(\2.expr,\3.scopedVars\4var \5=\1.replace(\6.interval, \3.scopedVars)/' /usr/share/grafana/public/app/plugins/datasource/prometheus/datasource.js
 
 sed -i 's/,range_input/.replace(\/"{\/g,"\\"").replace(\/}"\/g,"\\""),range_input/; s/step_input:""/step_input:this.target.step/' /usr/share/grafana/public/app/plugins/datasource/prometheus/query_ctrl.js
 
