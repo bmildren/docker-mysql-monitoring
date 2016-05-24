@@ -14,6 +14,12 @@ scrape_configs:
         labels:
           alias: db1
 
+  - job_name: docker
+    target_groups:
+      - targets: ['db1_cadvisor:8080']
+        labels:
+          alias: db1
+
   - job_name: mysql-hres
     target_groups:
       - targets: ['db1_mysqld_exporter_hres:9104']
