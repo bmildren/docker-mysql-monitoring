@@ -5,23 +5,23 @@ global:
  
 scrape_configs:
   - job_name: prometheus
-    target_groups:
+    static_configs:
       - targets: ['localhost:9090']
 
   - job_name: linux
-    target_groups:
+    static_configs:
       - targets: ['db1_node_exporter:9100']
         labels:
           alias: db1
 
   - job_name: docker
-    target_groups:
+    static_configs:
       - targets: ['db1_cadvisor:8080']
         labels:
           alias: db1
 
   - job_name: mysql-hres
-    target_groups:
+    static_configs:
       - targets: ['db1_mysqld_exporter_hres:9104']
         labels:
           alias: db1
@@ -29,7 +29,7 @@ scrape_configs:
   - job_name: mysql-mres
     scrape_interval: 5s
     scrape_timeout: 1s
-    target_groups:
+    static_configs:
       - targets: ['db1_mysqld_exporter_mres:9105']
         labels:
           alias: db1
@@ -37,7 +37,7 @@ scrape_configs:
   - job_name: mysql-lres
     scrape_interval: 60s
     scrape_timeout: 5s
-    target_groups:
+    static_configs:
       - targets: ['db1_mysqld_exporter_lres:9106']
         labels:
           alias: db1

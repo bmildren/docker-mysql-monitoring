@@ -9,6 +9,7 @@ MySQL monitoring example using docker-compose to orchestrate a monitoring soluti
 * cd to monitor and run: `docker-compose up -d`
 * To install an example db node with associated collectors, cd to example_dbnode and run: `docker-compose up -d`
 * To install only the collecters using docker (not required for the example dbnode), cd to collecters and run: `docker-compose up -d`
+* Manually create external network (monitor_dbnode) which required by collectors and example_dbnode. Using the following command:`docker network create monitor_dbnode`
 
 If you want to monitor other hosts edit the prometheus config file `./prometheus/config/prometheus.yml` add additional targets or your service discovery of choice, and restart prometheus, cd to monitor and run: `docker-compose restart prometheus`
 
